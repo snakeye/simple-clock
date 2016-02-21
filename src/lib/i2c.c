@@ -27,14 +27,17 @@ uint8_t i2c_transmit (uint8_t type)
 		// Send Start Condition
 		TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
 		break;
+		
 		case I2C_DATA:
 		// Send Data with No-Acknowledge
 		TWCR = (1 << TWINT) | (1 << TWEN);
 		break;
+		
 		case I2C_DATA_ACK:
 		// Send Data with Acknowledge
 		TWCR = (1 << TWEA) | (1 << TWINT) | (1 << TWEN);
 		break;
+		
 		case I2C_STOP:
 		// Send Stop Condition
 		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
@@ -50,7 +53,7 @@ uint8_t i2c_transmit (uint8_t type)
 	return (TWSR & 0xF8);
 }
 
-uint8_t i2c_start (unsigned int dev_id, unsigned int dev_addr, uint8_t rw_type)
+uint8_t i2c_start (uint8_t dev_addr, uint8_t rw_type)
 {
 	uint8_t twi_status;
 
@@ -60,24 +63,28 @@ uint8_t i2c_start (unsigned int dev_id, unsigned int dev_addr, uint8_t rw_type)
 		twi_status = i2c_transmit (I2C_START);
 
 		// Check the TWI Status
-		if (twi_status == TW_MT_ARB_LOST)
-		continue;
+		if (twi_status == TW_MT_ARB_LOST) {
+			continue;
+		}
 
-		if ((twi_status != TW_START) && (twi_status != TW_REP_START))
-		break;
+		if ((twi_status != TW_START) && (twi_status != TW_REP_START)) {
+			break;
+		}
 
 		// Send slave address (SLA_W)
-		TWDR = (dev_id & 0xF0) | (dev_addr & 0x07) | rw_type;
+		TWDR = dev_addr | rw_type;
 
 		// Transmit I2C Data
 		twi_status = i2c_transmit (I2C_DATA);
 
 		// Check the TWSR status
-		if ((twi_status == TW_MT_SLA_NACK) || (twi_status == TW_MT_ARB_LOST))
-		continue;
+		if ((twi_status == TW_MT_SLA_NACK) || (twi_status == TW_MT_ARB_LOST)) {
+			continue;
+		}
 
-		if (twi_status != TW_MT_SLA_ACK)
-		break;
+		if (twi_status != TW_MT_SLA_ACK) {
+			break;
+		}
 
 		return 0;
 	}

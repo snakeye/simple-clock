@@ -105,6 +105,12 @@
     <Compile Include="lib\display.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="lib\ds3231.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="lib\ds3231.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="lib\i2c.c">
       <SubType>compile</SubType>
     </Compile>

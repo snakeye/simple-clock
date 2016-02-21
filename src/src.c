@@ -10,44 +10,44 @@
 
 #include "lib/i2c.h"
 #include "lib/display.h"
+#include "lib/ds3231.h"
 
 void init()
 {
 	//cli();
 	//sei();
 
-	//	
+	//
 	display_init();
 	
 	//
 	i2c_init();
 }
 
-void print(uint16_t val) 
+void print(uint16_t val)
 {
-	for(uint8_t i = 0; i < 4; i++) {
+	for(uint8_t i = 0; i < DISPLAY_DIGITS; i++) {
 		uint8_t digit = val % 10;
 		val = val / 10;
 		
 		display_set_char(3 - i, '0' + digit);
-	}	
+	}
 }
 
 int main(void)
 {
 	init();
 	
-	uint16_t val = 0;
+	display_set_dots(1);
 	
 	while(1)
 	{
-		print(val);
+		time* tm = ds3231_time();
 		
-		val += 1;
-		if(val > 9999) {
-			val = 0;
-		}
-
-		//_delay_ms(50);
+		print(tm->sec);
+		
+		_delay_ms(20);
 	}
+	
+	return 0;
 }

@@ -21,7 +21,7 @@ void i2c_init();
 /* START I2C Routine */
 uint8_t i2c_transmit (uint8_t type);
 
-uint8_t i2c_start (unsigned int dev_id, unsigned int dev_addr, uint8_t rw_type);
+uint8_t i2c_start (uint8_t dev_addr, uint8_t rw_type);
 
 uint8_t i2c_stop (void);
 

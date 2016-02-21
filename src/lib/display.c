@@ -9,6 +9,8 @@
 #include "max7219.h"
 #include "charset.h"
 
+#include "display.h"
+
 uint8_t display_digits[8] = {0};
 
 #define SET_BIT(val, bit) (val |= (1 << (bit)))

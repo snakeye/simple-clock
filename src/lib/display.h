@@ -8,6 +8,8 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
+#define DISPLAY_DIGITS 4
+
 void display_init();
 
 void display_clear();
