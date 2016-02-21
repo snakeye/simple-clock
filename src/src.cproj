@@ -96,6 +96,15 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="lib\charset.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="lib\display.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="lib\display.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="lib\i2c.c">
       <SubType>compile</SubType>
     </Compile>
