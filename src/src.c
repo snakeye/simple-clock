@@ -12,40 +12,23 @@
 #include "lib/display.h"
 #include "lib/ds3231.h"
 
-#define MAX_BRIGHTNESS 0x0f
+#include "clock/brightness.h"
 
-uint16_t brightness = 0x08;
+typedef enum {
+	MODE_TIME,
+	MODE_DATE,
+	MODE_YEAR,
+	MODE_WEEKDAY,
+	MODE_TEMP,
+	MODE_SET_HOUR,
+	MODE_SET_MINUTE,
+	MODE_SET_SECOND,
+	MODE_SET_DAY,
+	MODE_SET_MONTH,
+	MODE_SET_YEAR
+} DISPLAY_MODE;
 
-/**
-* ADC Interrupt handler
-*/
-ISR(ADC_vect)
-{
-	uint16_t br = (ADCL | (ADCH << 8));
-	
-	// average
-	brightness = br;
-}
-
-void adc_init(uint8_t reg)
-{
-	// init ADC
-	// VCC with capacitor on AREF
-	// ADC0 as source
-	ADMUX = (1 << REFS0) | (reg & 0b111);
-	// ADC enable
-	// prescale = 128
-	// interrupt enable
-	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0)  | (1 << ADIE);
-}
-
-/**
-* Start ADC conversion
-*/
-void measure_brightness_async()
-{
-	ADCSRA |= (1 << ADSC);
-}
+DISPLAY_MODE display_mode = MODE_TIME;
 
 void init()
 {
@@ -54,12 +37,12 @@ void init()
 
 	//
 	display_init();
-	
+
 	//
 	i2c_init();
 	
 	// initialize ADC
-	adc_init(0);
+	adc_init(ADC0D);
 }
 
 void print(uint16_t val)
@@ -81,7 +64,7 @@ void print_time(uint8_t hour, uint8_t minute)
 	display_set_char(1, '0' + hl);
 	
 	uint8_t ml = minute % 10;
-	uint8_t mh = (minute / 10) % 10;	
+	uint8_t mh = (minute / 10) % 10;
 
 	display_set_char(2, '0' + mh);
 	display_set_char(3, '0' + ml);
@@ -93,25 +76,30 @@ int main(void)
 	
 	display_set_dots(0);
 	
+	// enable 1024Hz square wave
+	//ds3231_set_control_register((1 << DS3231_RS1));
+	
 	uint8_t hour, minute;
 	
 	while(1)
-	{
+	{		
+		//
 		ds3231_get_time(&hour, &minute);
 		
 		//
-		//print_time(hour, minute);
-		print(brightness);
+		print_time(hour, minute);
+		//print(brightness);
 
-		
-		uint8_t b = (brightness * MAX_BRIGHTNESS) / 1024	;
-		display_set_brightness(b);
+		display_set_brightness(get_brightness());
 		
 		//
 		measure_brightness_async();
 		
-		
-		_delay_ms(100);
+		// rest a bit
+		_delay_ms(10);
+
+		// reset watchdog timer
+		//asm("wdr");
 	}
 	
 	return 0;

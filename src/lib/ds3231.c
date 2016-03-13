@@ -107,3 +107,11 @@ int8_t ds3231_get_temperature()
 	
 	return data[0];
 }
+
+void ds3231_set_control_register(uint8_t reg)
+{
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x0E);
+	i2c_write(reg);
+	i2c_stop();
+}
