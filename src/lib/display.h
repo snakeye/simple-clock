@@ -17,4 +17,6 @@ void display_set_char(uint8_t position, char ch);
 void display_set_dot(uint8_t position, uint8_t enabled);
 void display_set_dots(uint8_t enabled);
 
+void display_set_brightness(uint8_t brightness);
+
 #endif /* DISPLAY_H_ */

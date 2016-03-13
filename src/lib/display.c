@@ -28,7 +28,7 @@ void display_init()
 	max7219_write(MAX7219_REG_SHUTDOWN, 1);
 	
 	// set brightness
-	max7219_write(MAX7219_REG_BRIGHTNESS, 0x04);
+	max7219_write(MAX7219_REG_BRIGHTNESS, 0x08);
 
 	display_clear();
 }
@@ -83,4 +83,9 @@ void display_set_dots(uint8_t enabled)
 	}
 	
 	max7219_write(8, display_digits[7]);
+}
+
+void display_set_brightness(uint8_t brightness)
+{
+	max7219_write(MAX7219_REG_BRIGHTNESS, brightness);
 }

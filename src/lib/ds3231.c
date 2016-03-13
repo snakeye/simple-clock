@@ -25,7 +25,48 @@ uint8_t bcd2dec (uint8_t num)
 	return ((num / 16 * 10) + (num % 16));
 }
 
-time* ds3231_time()
+uint8_t decode_hour(uint8_t hour)
+{
+	if((hour & 0b01000000)){
+		// 12 hour mode
+		uint8_t h = bcd2dec(hour & 0b00011111);
+		if((hour & 0b00100000)) {
+			//h += 12;
+		}
+		return h;
+	}
+	else {
+		// 24 hour mode
+		return bcd2dec(hour & 0b00111111);
+	}
+}
+
+void ds3231_get_time(uint8_t* hour, uint8_t* minute)
+{
+	uint8_t data[2];
+	
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x01);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data[0], NACK);
+	i2c_stop();
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x02);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data[1], NACK);
+	i2c_stop();
+	
+	// decode
+	*minute = bcd2dec(data[0]);
+	*hour = bcd2dec(data[1]);
+}
+
+time* ds3231_get_date_time()
 {
 	uint8_t data[7];
 	
@@ -40,7 +81,29 @@ time* ds3231_time()
 	i2c_stop();
 	
 	// decode
-	tm.sec = bcd2dec(data[0] & 0x7F);
+	tm.sec = bcd2dec(data[0]);
+	tm.min = bcd2dec(data[1]);
+	tm.hour = decode_hour(data[2]);
+	tm.day = bcd2dec(data[4]);
+	tm.month = bcd2dec(data[5] & 0x1f);
+	tm.year = bcd2dec(data[6]);
 	
 	return &tm;
+}
+
+int8_t ds3231_get_temperature()
+{
+	uint8_t data[2];
+	
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x11);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	for(uint8_t i = 0; i < 2; i++){
+		i2c_read(&data[i], NACK);
+	}
+	i2c_stop();
+	
+	return data[0];
 }
