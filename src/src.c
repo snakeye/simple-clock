@@ -6,6 +6,7 @@
 */
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 #include <util/delay.h>
 
 #include "lib/i2c.h"
@@ -13,6 +14,8 @@
 #include "lib/ds3231.h"
 
 #include "clock/brightness.h"
+#include "clock/buttons.h"
+#include "clock/watchdog.h"
 
 typedef enum {
 	MODE_TIME,
@@ -43,6 +46,12 @@ void init()
 	
 	// initialize ADC
 	adc_init(ADC0D);
+	
+	// Start button processing
+	buttons_init();
+	
+	// Start watchdog timer
+	//watchdog_init();
 }
 
 void print(uint16_t val)
@@ -60,7 +69,7 @@ void print_time(uint8_t hour, uint8_t minute)
 	uint8_t hl = hour % 10;
 	uint8_t hh = (hour / 10) % 10;
 	
-	display_set_char(0, '0' + hh);
+	display_set_char(0, hh > 0 ? '0' + hh : ' ');
 	display_set_char(1, '0' + hl);
 	
 	uint8_t ml = minute % 10;
@@ -70,36 +79,49 @@ void print_time(uint8_t hour, uint8_t minute)
 	display_set_char(3, '0' + ml);
 }
 
+void on_button_click(uint8_t button)
+{
+}
+
+void on_button_hold(uint8_t button)
+{
+}
+
+void on_button_release(uint8_t button)
+{
+	
+}
+
 int main(void)
 {
 	init();
 	
-	display_set_dots(0);
-	
+	//display_set_dots(0);
 	// enable 1024Hz square wave
 	//ds3231_set_control_register((1 << DS3231_RS1));
-	
-	uint8_t hour, minute;
-	
+		
 	while(1)
-	{		
+	{
 		//
+		uint8_t hour, minute;
 		ds3231_get_time(&hour, &minute);
-		
-		//
 		print_time(hour, minute);
-		//print(brightness);
+		//print(bStatus);
 
-		display_set_brightness(get_brightness());
-		
+		/////////////////////////////////////////////////////////////////////
+
 		//
-		measure_brightness_async();
+		buttons_tick();
 		
+		// brightness
+		measure_brightness_async();
+		display_set_brightness(get_brightness());
+						
 		// rest a bit
 		_delay_ms(10);
 
 		// reset watchdog timer
-		//asm("wdr");
+		wdt_reset();
 	}
 	
 	return 0;

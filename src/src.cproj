@@ -78,7 +78,7 @@
   <avrgcc.compiler.symbols.DefSymbols>
     <ListValues>
       <Value>DEBUG</Value>
-      <Value>F_CPU=8000000ul</Value>
+      <Value>F_CPU=800000ul</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
@@ -100,6 +100,18 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="clock\brightness.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="clock\buttons.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="clock\buttons.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="clock\watchdog.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="clock\watchdog.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="lib\charset.h">
