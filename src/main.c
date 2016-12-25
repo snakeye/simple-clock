@@ -18,26 +18,26 @@
 #include "clock/watchdog.h"
 
 typedef enum {
-	MODE_DISPLAY,
-	MODE_SETTINGS
+	MODE_DISPLAY = 0,
+	MODE_SETTINGS = 1
 } DISPLAY_MODE;
 
 typedef enum {
 	//
-	SUBMODE_TIME,
-	SUBMODE_DATE,
-	SUBMODE_YEAR,
-	SUBMODE_SECOND,
-	SUBMODE_TEMP,
+	SUBMODE_TIME = 0,
+	SUBMODE_DATE = 1,
+	SUBMODE_YEAR = 2,
+	SUBMODE_SECOND = 3,
+	SUBMODE_TEMP = 4,
 	//
-	SUBMODE_SET_HOUR,
-	SUBMODE_SET_MINUTE,
-	SUBMODE_SET_SECOND,
-	SUBMODE_SET_DAY,
-	SUBMODE_SET_MONTH,
-	SUBMODE_SET_YEAR,
-	SUBMODE_SET_AUTO_BRIGHTNESS,
-	SUBMODE_SET_MAX_BRIGHTNESS
+	SUBMODE_SET_HOUR = 5,
+	SUBMODE_SET_MINUTE = 6,
+	SUBMODE_SET_SECOND = 7,
+	SUBMODE_SET_DAY = 8,
+	SUBMODE_SET_MONTH = 9,
+	SUBMODE_SET_YEAR = 10,
+	SUBMODE_SET_AUTO_BRIGHTNESS = 11,
+	SUBMODE_SET_MAX_BRIGHTNESS = 12
 } DISPLAY_SUBMODE;
 
 DISPLAY_MODE display_mode = MODE_DISPLAY;
@@ -80,6 +80,16 @@ void print(uint16_t val)
 	}
 }
 
+void print_hex(uint16_t val) {
+	static char chars[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+	for(uint8_t i = 0; i < DISPLAY_DIGITS; i++) {
+		uint8_t digit = val % 16;
+		val = val / 16;
+		
+		display_set_char(3 - i, chars[digit]);
+	}	
+}
+
 void print_time(uint8_t hour, uint8_t minute)
 {
 	uint8_t hl = hour % 10;
@@ -95,7 +105,7 @@ void print_time(uint8_t hour, uint8_t minute)
 	display_set_char(3, '0' + ml);
 }
 
-// button 0 cycles display modes
+// button 1 cycles display modes
 void on_button_0(){
 	if(display_mode == MODE_DISPLAY){
 		switch(display_submode) {
@@ -146,7 +156,7 @@ void on_button_0(){
 	}
 }
 
-// button 1 changes values
+// button 0 changes values
 void on_button_1(){
 	if(display_mode == MODE_SETTINGS) {
 		switch(display_submode){
@@ -178,8 +188,7 @@ void on_button_release(uint8_t button) {
 
 void on_button_hold(uint8_t button)
 {
-	/*
-	if(button_hold_status(0) && button_hold_status(1)) {
+	if(button == 0) {
 		if(display_mode == MODE_DISPLAY) {
 			display_mode = MODE_SETTINGS;
 			display_submode = SUBMODE_SET_HOUR;
@@ -189,7 +198,6 @@ void on_button_hold(uint8_t button)
 			display_submode = SUBMODE_TIME;
 		}
 	}
-	*/
 }
 
 void on_button_click(uint8_t button) {
@@ -230,8 +238,9 @@ void update_brightness(uint16_t tick)
 
 void update_display(uint16_t tick)
 {
-	//print_time(display_mode, display_submode);
-	print_time((PINC & (1 << PORTC1)) == 0, (PINC & (1 << PORTC2)) == 0);
+	print_time(display_mode, display_submode);
+	//print_hex(button_status[0]);
+	//print_time((PINC & (1 << PORTC1)) == 0, (PINC & (1 << PORTC2)) == 0);
 
 	/*
 	uint8_t hour, minute;
