@@ -68,7 +68,7 @@ void ds3231_get_time(uint8_t* hour, uint8_t* minute)
 
 time* ds3231_get_date_time()
 {
-	uint8_t data[7];
+	static uint8_t data[7] = {0};
 	
 	i2c_start(ADDR, TW_WRITE);
 	i2c_write(0x00);

@@ -213,12 +213,12 @@ void on_button_click(uint8_t button) {
 
 void update_brightness(uint16_t tick)
 {
-	if ((tick % 200) == 0){
+	if ((tick % 20) == 0){
 		// start measuring brightness
 		measure_brightness_async();
 	}
 	
-	if((tick % 200) == 100){
+	if((tick % 20) == 10){
 		// read measurement
 		target_brightness = get_brightness();
 	}
@@ -238,22 +238,19 @@ void update_brightness(uint16_t tick)
 
 void update_display(uint16_t tick)
 {
-	print_time(display_mode, display_submode);
+	//print_time(display_mode, display_submode);
 	//print_hex(button_status[0]);
 	//print_time((PINC & (1 << PORTC1)) == 0, (PINC & (1 << PORTC2)) == 0);
+    //print(tick);
 
-	/*
-	uint8_t hour, minute;
-	ds3231_get_time(&hour, &minute);
-	print_time(display_mode, display_submode);
+   	//static uint8_t hour, minute;
+	//ds3231_get_time(&hour, &minute);
+	//print_time(display_mode, display_submode);
 
-	if(tick == 0) {
-		display_set_dots(0);
-	}
-	else if(tick == 50) {
-		display_set_dots(1);
-	}
-	*/
+    time* tm = ds3231_get_date_time();
+	print_time(tm->hour, tm->sec);
+
+	display_set_dots((tick / 25) % 2);
 }
 
 int main(void)
@@ -262,7 +259,7 @@ int main(void)
 	
 	//display_set_dots(0);
 	// enable 1024Hz square wave
-	//ds3231_set_control_register((1 << DS3231_RS1));
+	ds3231_set_control_register((1 << DS3231_RS1));
 	
 	uint16_t tick = 0;
 	
@@ -278,8 +275,9 @@ int main(void)
 		update_brightness(tick);
 				
 		// rest a bit
-		_delay_us(1);
-		tick = (tick + 1) % 1000;
+		//_delay_us(1);
+		_delay_ms(1);
+		tick = (tick + 1) % 100;
 
 		// reset watchdog timer
 		wdt_reset();
