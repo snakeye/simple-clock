@@ -124,7 +124,7 @@ uint8_t i2c_read (uint8_t *data, uint8_t ack_type)
 {
 	uint8_t twi_status;
 
-	if (ack_type)
+	if (ack_type == ACK)
 	{
 		// Read I2C Data and Send Acknowledge
 		twi_status = i2c_transmit (I2C_DATA_ACK);

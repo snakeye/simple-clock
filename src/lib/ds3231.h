@@ -26,9 +26,26 @@ typedef struct {
 } time;
 
 void ds3231_get_time(uint8_t* hour, uint8_t* minute);
+
+uint8_t ds3231_get_second();
+uint8_t ds3231_get_minute();
+uint8_t ds3231_get_hour();
+uint8_t ds3231_get_day();
+uint8_t ds3231_get_month();
+uint8_t ds3231_get_year();
+
+void ds3231_set_second(uint8_t second);
+void ds3231_set_minute(uint8_t minute);
+void ds3231_set_hour(uint8_t hour);
+void ds3231_set_day(uint8_t day);
+void ds3231_set_month(uint8_t month);
+void ds3231_set_year(uint8_t year);
+
 time* ds3231_get_date_time();
+
 int8_t ds3231_get_temperature();
 
 void ds3231_set_control_register(uint8_t reg);	
+uint8_t ds3231_get_status();
 
 #endif /* DS3231_H_ */

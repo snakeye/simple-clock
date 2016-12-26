@@ -41,6 +41,10 @@ uint8_t decode_hour(uint8_t hour)
 	}
 }
 
+uint8_t encode_hour(uint8_t hour) {
+	return dec2bcd(hour);
+}
+
 void ds3231_get_time(uint8_t* hour, uint8_t* minute)
 {
 	uint8_t data[2];
@@ -65,6 +69,97 @@ void ds3231_get_time(uint8_t* hour, uint8_t* minute)
 	*minute = bcd2dec(data[0]);
 	*hour = bcd2dec(data[1]);
 }
+
+uint8_t ds3231_get_second() {
+	uint8_t data;
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x00);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data, NACK);
+	i2c_stop();
+	
+	// decode
+	return bcd2dec(data);
+}
+
+uint8_t ds3231_get_minute() {
+	uint8_t data;
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x01);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data, NACK);
+	i2c_stop();
+	
+	// decode
+	return bcd2dec(data);
+}
+
+uint8_t ds3231_get_hour() {
+	uint8_t data;
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x02);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data, NACK);
+	i2c_stop();
+	
+	// decode
+	return decode_hour(data);
+}
+
+uint8_t ds3231_get_day() {
+	uint8_t data;
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x04);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data, NACK);
+	i2c_stop();
+	
+	// decode
+	return bcd2dec(data);
+}
+
+uint8_t ds3231_get_month() {
+	uint8_t data;
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x05);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data, NACK);
+	i2c_stop();
+	
+	// decode
+	return bcd2dec(data);
+}
+
+uint8_t ds3231_get_year() {
+	uint8_t data;
+
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x06);
+	i2c_stop();
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&data, NACK);
+	i2c_stop();
+	
+	// decode
+	return bcd2dec(data);
+}
+
 
 time* ds3231_get_date_time()
 {
@@ -113,5 +208,61 @@ void ds3231_set_control_register(uint8_t reg)
 	i2c_start(ADDR, TW_WRITE);
 	i2c_write(0x0E);
 	i2c_write(reg);
+	i2c_stop();
+}
+
+uint8_t ds3231_get_status() {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x0F);
+	i2c_stop();
+	
+	uint8_t reg = 0;
+	
+	i2c_start(ADDR, TW_READ);
+	i2c_read(&reg, ACK);
+	i2c_stop();
+	
+	return reg;
+}
+
+void ds3231_set_second(uint8_t second) {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x00);
+	i2c_write(dec2bcd(second));
+	i2c_stop();
+}
+
+void ds3231_set_minute(uint8_t minute) {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x01);
+	i2c_write(dec2bcd(minute));
+	i2c_stop();
+}
+
+void ds3231_set_hour(uint8_t hour) {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x02);
+	i2c_write(dec2bcd(hour));
+	i2c_stop();
+}
+
+void ds3231_set_day(uint8_t day) {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x04);
+	i2c_write(dec2bcd(day));
+	i2c_stop();
+}
+
+void ds3231_set_month(uint8_t month) {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x05);
+	i2c_write(dec2bcd(month));
+	i2c_stop();
+}
+
+void ds3231_set_year(uint8_t year) {
+	i2c_start(ADDR, TW_WRITE);
+	i2c_write(0x06);
+	i2c_write(dec2bcd(year));
 	i2c_stop();
 }

@@ -43,8 +43,27 @@ typedef enum {
 DISPLAY_MODE display_mode = MODE_DISPLAY;
 DISPLAY_SUBMODE display_submode = SUBMODE_TIME;
 
-uint8_t brightness;
-uint8_t target_brightness;
+uint8_t brightness = 0;
+uint8_t target_brightness = 0;
+
+uint16_t sqw = 0;
+
+ISR( INT0_vect) {
+	
+}
+
+ISR( INT1_vect ) {
+	sqw = (sqw + 1) % 1024;
+}
+
+void initInterrupts(void) {	
+	EIMSK |= (1 << INT0) | ( 1 << INT1 );        // Enable both interrupts
+	EICRA |= (1 << ISC01) | ( 1 << ISC11 );      // Falling edge on both
+	
+	PORTD |= ( 1 << PORTD2 ) | ( 1 << PORTD3 ); // Pull up resistors
+	
+	sei();
+}
 
 void init()
 {
@@ -62,6 +81,8 @@ void init()
 	
 	// Start button processing
 	buttons_init();
+	
+	initInterrupts();
 	
 	// Start watchdog timer
 	//watchdog_init();
@@ -87,22 +108,63 @@ void print_hex(uint16_t val) {
 		val = val / 16;
 		
 		display_set_char(3 - i, chars[digit]);
-	}	
+	}
 }
 
 void print_time(uint8_t hour, uint8_t minute)
 {
-	uint8_t hl = hour % 10;
-	uint8_t hh = (hour / 10) % 10;
+	if (hour == 255) {
+		display_set_char(0, ' ');
+		display_set_char(1, ' ');
+	}
+	else {
+		uint8_t hl = hour % 10;
+		uint8_t hh = (hour / 10) % 10;
+		
+		display_set_char(0, hh > 0 ? '0' + hh : ' ');
+		display_set_char(1, '0' + hl);
+	}
 	
-	display_set_char(0, hh > 0 ? '0' + hh : ' ');
-	display_set_char(1, '0' + hl);
-	
-	uint8_t ml = minute % 10;
-	uint8_t mh = (minute / 10) % 10;
+	if (minute == 255) {
+		display_set_char(2, ' ');
+		display_set_char(3, ' ');
+	}
+	else {
+		uint8_t ml = minute % 10;
+		uint8_t mh = (minute / 10) % 10;
 
-	display_set_char(2, '0' + mh);
-	display_set_char(3, '0' + ml);
+		display_set_char(2, '0' + mh);
+		display_set_char(3, '0' + ml);
+	}
+}
+
+void print_seconds(uint8_t seconds) {
+	display_set_char(0, ' ');
+	display_set_char(1, ' ');
+
+	if (seconds == 255) {
+		display_set_char(2, ' ');
+		display_set_char(3, ' ');
+	}
+	else {
+		uint8_t sl = seconds % 10;
+		uint8_t sh = (seconds / 10) % 10;
+
+		display_set_char(2, '0' + sh);
+		display_set_char(3, '0' + sl);
+	}
+}
+
+void print_temp(int8_t temp) {
+	uint8_t tl = temp % 10;
+	uint8_t th = (temp / 10) % 10;
+
+	display_set_char(0, temp < 0 ? '-' : ' ');
+
+	display_set_char(1, '0' + th);
+	display_set_char(2, '0' + tl);
+	
+	display_set_char(3, '*');
 }
 
 // button 1 cycles display modes
@@ -124,6 +186,8 @@ void on_button_0(){
 			case SUBMODE_TEMP:
 			display_submode = SUBMODE_TIME;
 			break;
+			default: 
+			break;
 		}
 	}
 	else if(display_mode == MODE_SETTINGS) {
@@ -144,13 +208,9 @@ void on_button_0(){
 			display_submode = SUBMODE_SET_YEAR;
 			break;
 			case SUBMODE_SET_YEAR:
-			display_submode = SUBMODE_SET_AUTO_BRIGHTNESS;
-			break;
-			case SUBMODE_SET_AUTO_BRIGHTNESS:
-			display_submode = SUBMODE_SET_MAX_BRIGHTNESS;
-			break;
-			case SUBMODE_SET_MAX_BRIGHTNESS:
 			display_submode = SUBMODE_SET_HOUR;
+			break;
+			default: 
 			break;
 		}
 	}
@@ -161,20 +221,24 @@ void on_button_1(){
 	if(display_mode == MODE_SETTINGS) {
 		switch(display_submode){
 			case SUBMODE_SET_HOUR:
+			ds3231_set_hour((ds3231_get_hour() + 1) % 24);
 			break;
 			case SUBMODE_SET_MINUTE:
+			ds3231_set_minute((ds3231_get_minute() + 1) % 60);
 			break;
 			case SUBMODE_SET_SECOND:
+			ds3231_set_second(0);
 			break;
 			case SUBMODE_SET_DAY:
+			ds3231_set_day(1 + ((ds3231_get_day() + 1) % 31));
 			break;
 			case SUBMODE_SET_MONTH:
+			ds3231_set_month(1 + ((ds3231_get_month() + 1) % 12));
 			break;
 			case SUBMODE_SET_YEAR:
+			ds3231_set_year((ds3231_get_year() + 1) % 25);
 			break;
-			case SUBMODE_SET_AUTO_BRIGHTNESS:
-			break;
-			case SUBMODE_SET_MAX_BRIGHTNESS:
+			default:
 			break;
 		}
 	}
@@ -238,19 +302,68 @@ void update_brightness(uint16_t tick)
 
 void update_display(uint16_t tick)
 {
-	//print_time(display_mode, display_submode);
-	//print_hex(button_status[0]);
-	//print_time((PINC & (1 << PORTC1)) == 0, (PINC & (1 << PORTC2)) == 0);
-    //print(tick);
+	uint8_t y = sqw / 512;
+    uint8_t y2 = (sqw / 256) % 2;
 
-   	//static uint8_t hour, minute;
-	//ds3231_get_time(&hour, &minute);
-	//print_time(display_mode, display_submode);
-
-    time* tm = ds3231_get_date_time();
-	print_time(tm->hour, tm->sec);
-
-	display_set_dots((tick / 25) % 2);
+	if(display_mode == MODE_DISPLAY){
+		switch(display_submode) {
+			case SUBMODE_TIME:
+			print_time(ds3231_get_hour(), ds3231_get_minute());
+			display_set_dots(y);
+			break;
+			case SUBMODE_SECOND:
+			print_seconds(ds3231_get_second());
+			display_set_dots(1);
+			break;
+			case SUBMODE_DATE:
+			print_time(ds3231_get_day(), ds3231_get_month());
+			display_set_dot(1, 1);
+			display_set_dots(0);
+			break;
+			case SUBMODE_YEAR:
+			print(2000 + ds3231_get_year());
+			display_set_dots(0);
+			break;
+			case SUBMODE_TEMP:
+			print_temp(ds3231_get_temperature());
+			display_set_dots(0);
+			break;
+			default: 
+			break;
+		}
+	}
+	else if(display_mode == MODE_SETTINGS) {
+		switch(display_submode){
+			case SUBMODE_SET_HOUR:
+			print_time(y2 ? ds3231_get_hour() : -1, ds3231_get_minute());
+			display_set_dots(y);
+			break;
+			case SUBMODE_SET_MINUTE:
+			print_time(ds3231_get_hour(), y2 ? ds3231_get_minute() : -1);
+			display_set_dots(y);
+			break;
+			case SUBMODE_SET_SECOND:
+			print_seconds(y2 ? ds3231_get_second() : -1);
+			display_set_dots(1);
+			break;
+			case SUBMODE_SET_DAY:
+			print_time(y2 ? ds3231_get_day() : -1, ds3231_get_month());
+			display_set_dot(1, 1);
+			display_set_dots(0);
+			break;
+			case SUBMODE_SET_MONTH:
+			print_time(ds3231_get_day(), y2 ? ds3231_get_month() : -1);
+			display_set_dot(1, 1);
+			display_set_dots(0);
+			break;
+			case SUBMODE_SET_YEAR:
+			print_time(20, y2 ? ds3231_get_year() : -1);
+			display_set_dots(0);
+			break;
+			default:
+			break;
+		}
+	}
 }
 
 int main(void)
@@ -258,8 +371,11 @@ int main(void)
 	init();
 	
 	//display_set_dots(0);
+	
+	//DDRD &= ~((1 << PORTD3));
+
 	// enable 1024Hz square wave
-	ds3231_set_control_register((1 << DS3231_RS1));
+	ds3231_set_control_register(1 << DS3231_RS1);
 	
 	uint16_t tick = 0;
 	
@@ -273,10 +389,10 @@ int main(void)
 
 		// brightness
 		update_brightness(tick);
-				
+		
 		// rest a bit
-		//_delay_us(1);
-		_delay_ms(1);
+		_delay_us(1);
+		//_delay_ms(1);
 		tick = (tick + 1) % 100;
 
 		// reset watchdog timer

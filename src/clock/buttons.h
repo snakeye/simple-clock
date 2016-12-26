@@ -8,8 +8,8 @@
 #ifndef BUTTONS_H_
 #define BUTTONS_H_
 
-#define BUTTON_CLICK_TIME 5
-#define BUTTON_HOLD_TIME 150
+#define BUTTON_CLICK_TIME 1
+#define BUTTON_HOLD_TIME 50
 
 extern uint16_t button_status[];
 
