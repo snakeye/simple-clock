@@ -1,0 +1,15 @@
+"Qty";"Value";"Device";"Package";"Parts";"Description";"MF";"MPN";"OC_FARNELL";"OC_NEWARK";"PROD_ID";"VALUE";
+"4";"0.1";"C-EUC0805";"C0805";"C1, C2, C4, C5";"CAPACITOR, European symbol";"";"";"";"";"";"";
+"1";"10k";"R-EU_R0805";"R0805";"R3";"RESISTOR, European symbol";"";"";"";"";"";"";
+"2";"10uF";"10UF-16V-10%(TANT)";"EIA3216";"C6, C8";"CAP-00811";"";"";"";"";"CAP-00811";"10uF";
+"7";"4.7k";"R-EU_R0805";"R0805";"R1, R2, R4, R5, R6, R8, R9";"RESISTOR, European symbol";"";"";"";"";"";"";
+"1";"68k";"R-EU_R0805";"R0805";"R7";"RESISTOR, European symbol";"";"";"";"";"";"";
+"1";"BATTERY1220";"BATTERY1220";"1220-SMD";"B1";"";"";"";"";"";"";"";
+"1";"DS3231WIDE";"DS3231WIDE";"SO16W";"U$2";"";"";"";"";"";"";"";
+"1";"GL5537";"GL5537";"GL55";"U$6";"GL5537 Photoresistor";"";"";"";"";"";"";
+"2";"IT1188E";"IT1188E";"IT1188E";"U$3, U$4";"IT1188E SMD Tact button";"";"";"";"";"";"";
+"1";"LBT8402BW";"LBT8402BW";"LBT8402";"U$1";"LBT8402BW Clock LED Display";"";"";"";"";"";"";
+"1";"MAX7219CWG";"MAX7219CWG";"SO24L";"U$7";"";"";"";"";"";"";"";
+"1";"MEGA8-AI";"MEGA8-AI";"TQFP32-08";"IC1";"MICROCONTROLLER";"";"ATMEGA8-16AU";"9171371";"73M8863";"";"";
+"1";"MICRO-USB";"MICRO-USB";"MICRO-USB";"U$8";"Micro USB B connector";"";"";"";"";"";"";
+"1";"PINHD-1X5";"PINHD-1X5";"PLL1.27-1X5";"U$9";"Pin Header 1.27 5x1";"";"";"";"";"";"";
